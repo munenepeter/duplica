@@ -21,8 +21,14 @@ void print_files(const char *path){
 }
 
 
-int main(){
+int main(int argc, char **argv){
 
+   if(argc < 1){
+	printf("Usage: Please provide a directory path");
+	return 1;
+   }
+  
+  
  const char *dir = ".";
 
  print_files(dir);
