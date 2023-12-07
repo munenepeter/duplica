@@ -1,18 +1,20 @@
 #include<stdio.h>
+#include<stdlib.h>
+#include<errno.h>
 #include<dirent.h>
 
-void print_files(const char *dir){
+void print_files(const char *path){
  //open the directory
- DIR *dir = opendir(dir);
+ DIR *dir = opendir(path);
 
  if(dir == NULL){
-  fprintf(stderr, "Error: Could not open %s because of %s", dir, errno);
+  fprintf(stderr, "Error: Could not open %s because of %d", path, errno);
  exit(1);
 }
  struct dirent* entry;
  
  while((entry = readdir(dir)) != NULL){
-  printf("%s\n", entry->d_name;
+  printf("%s\n", entry->d_name);
 } 
 
  closedir(dir);
@@ -21,7 +23,7 @@ void print_files(const char *dir){
 
 int main(){
 
- char *dir = ".";
+ const char *dir = ".";
 
  print_files(dir);
 
