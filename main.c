@@ -9,13 +9,13 @@ void print_files(const char *path){
 
  if(dir == NULL){
   fprintf(stderr, "Error: Could not open %s because of %d", path, errno);
- exit(1);
-}
+  exit(1);
+ }
  struct dirent* entry;
  
  while((entry = readdir(dir)) != NULL){
   printf("%s\n", entry->d_name);
-} 
+ } 
 
  closedir(dir);
 }
