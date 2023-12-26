@@ -1,10 +1,34 @@
 #define _DEFAULT_SOURCE
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <dirent.h>
+
+#define PATH_SEP "/"
+#define PATH_SEP_LEN (sizeof(PATH_SEP)-1)
+
+char* join_path(const char* base, const char* file) {
+
+   size_t base_len = strlen(base);
+   size_t file_len = strlen(file);
+
+   char* begin = malloc(base_len + file_len + PATH_SEP_LEN + 1);
+   assert(begin != NULL);
+
+   char* end = begin;
+   memcpy(end, base, base_len);
+   end += base_len;
+   memcpy(end, PATH_SEP, PATH_SEP_LEN);
+   end += PATH_SEP_LEN;
+   memcpy(end, file, file_len);
+   end += file_len;
+   *end = '\0';
+
+   return begin;
+}
 
 void print_files_recursively(const char* dir_path) {
 
@@ -19,7 +43,12 @@ void print_files_recursively(const char* dir_path) {
    struct dirent* ent = readdir(dir);
    while (ent != NULL) {
       if (ent->d_type == DT_DIR) {
-         print_files_recursively(concat(dir_path, ent->d_name));
+         if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0){
+            char* child_path = join_path(dir_path, ent->d_name);
+            print_files_recursively(child_path);
+            free(child_path);
+         }
+        
       }
       else {
          printf("file: %s\n", ent->d_name);
