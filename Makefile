@@ -1,4 +1,4 @@
-CFLAGS=-Wall -Wextra -std=c11 -pendatic -ggdb
+CFLAGS=-Wall -Wextra -std=c11 -pedantic -ggdb
 LIBS=
 
 deplica: main.c
