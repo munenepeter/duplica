@@ -1,40 +1,28 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<errno.h>
-#include<dirent.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <dirent.h>
 
-void print_files(const char *path){
- //open the directory
- DIR *dir = opendir(path);
+int main(int argc, char** argv) {
 
- if(dir == NULL){
-  fprintf(stderr, "Error: Could not open %s because of %d", path, errno);
-  exit(1);
- }
- struct dirent* entry;
- 
- while((entry = readdir(dir)) != NULL){
-  printf("%s\n", entry->d_name);
- } 
+   (void)argc;
+   (void)argv;
 
- closedir(dir);
-}
+   const char* dir_path = ".";
 
-
-int main(int argc, char **argv){
-
-   (void) argc;
-   (void) argv;
-
-   if(argc < 1){
-	printf("Usage: Please provide a directory path");
-	return 1;
+   DIR* dir = opendir(dir_path);
+   if (dir == NULL) {
+      fprintf(stderr, "E: Could not open directory %s: %s\n", dir_path, strerror(errno));
+      exit(1);
    }
-  
-  
- const char *dir = ".";
 
- print_files(dir);
+   errno = 0;
 
- return  0;
+   struct dirent* ent = readdir(dir);
+   while (ent != NULL) {
+      printf("file: %s\n", ent->d_name);
+   }
+
+   return 0;
 }
