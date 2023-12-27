@@ -1,5 +1,13 @@
-void get_files_in_dir(const char *path){
- //open the directory
+#include "file.h"
+
+#include <dirent.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <stdio.h>
+
+
+void get_files_in_dir(const char* path) {
+    //open the directory
  DIR *dir = opendir(path);
 
  if(dir == NULL){
