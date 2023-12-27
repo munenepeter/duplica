@@ -39,17 +39,40 @@ typedef struct {
    size_t dirs_size;
 }RECDIR;
 
+int recdir_push(RECDIR* recdir, const char* dir_path) {
+   assert(recdir->dirs_size < DIRS_CAP);
+
+   DIR** dir = &recdir->dirs[recdir->dirs_size];
+   *dir = opendir(dir_path);
+
+   if (*dir == NULL) {
+      return -1;
+   }
+   recdir->dirs_size++;
+   return 0;
+}
+
 RECDIR* openrecdir(const char* dir_path) {
-   (void)dir_path;
-   return NULL;
+   RECDIR* recdir = malloc(sizeof(RECDIR));
+   assert(recdir != NULL);
+   memset(recdir, 0, sizeof(RECDIR));
+
+   if (recdir_push(recdir, dir_path) < 0) {
+      closerecdir(recdir);
+      return NULL;
+   }
+   return recdir;
 }
 struct dirent* readrecdir(RECDIR* recdirp) {
    (void)recdirp;
    return NULL;
 }
-int closerecdir(RECDIR* recdirp) {
-   (void)recdirp;
-   return 0;
+void closerecdir(RECDIR* recdirp) {
+   for (size_t i = 0; i < recdirp->dirs_size; i++) {
+      int ret = closedir(recdirp->dirs[i]);
+      assert(ret == 0);
+   }
+   free(recdirp);
 }
 
 
@@ -66,12 +89,12 @@ void print_files_recursively(const char* dir_path) {
    struct dirent* ent = readdir(dir);
    while (ent != NULL) {
       if (ent->d_type == DT_DIR) {
-         if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0){
+         if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0) {
             char* child_path = join_path(dir_path, ent->d_name);
             print_files_recursively(child_path);
             free(child_path);
          }
-        
+
       }
       else {
          printf("file: %s\n", ent->d_name);
