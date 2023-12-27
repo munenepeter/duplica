@@ -11,7 +11,7 @@
 #define PATH_SEP_LEN (sizeof(PATH_SEP)-1)
 
 
-#define DIRS_CAP 10
+#define DIRS_CAP 1024
 
 
 char* join_path(const char* base, const char* file) {
@@ -37,12 +37,20 @@ char* join_path(const char* base, const char* file) {
 typedef struct {
    DIR* dirs[DIRS_CAP];
    size_t dirs_size;
-
 }RECDIR;
 
-RECDIR *openrecdir(const char* dir_path);
-struct dirent *readrecdir(RECDIR* recdirp);
-int closerecdir(RECDIR* recdirp);
+RECDIR* openrecdir(const char* dir_path) {
+   (void)dir_path;
+   return NULL;
+}
+struct dirent* readrecdir(RECDIR* recdirp) {
+   (void)recdirp;
+   return NULL;
+}
+int closerecdir(RECDIR* recdirp) {
+   (void)recdirp;
+   return 0;
+}
 
 
 void print_files_recursively(const char* dir_path) {
