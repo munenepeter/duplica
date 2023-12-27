@@ -11,7 +11,7 @@
 #define PATH_SEP_LEN (sizeof(PATH_SEP)-1)
 
 
-#define DIRS_CAP 1024
+#define RECDIR_STACK_CAP 1024
 
 
 char* join_path(const char* base, const char* file) {
@@ -35,12 +35,16 @@ char* join_path(const char* base, const char* file) {
 }
 
 typedef struct {
-   DIR* dirs[DIRS_CAP];
+
+}RECDIR_Frame;
+typedef struct {
+   DIR* dirs[RECDIR_STACK_CAP];
+   char *paths[RECDIR_STACK_CAP];
    size_t dirs_size;
 }RECDIR;
 
 int recdir_push(RECDIR* recdir, const char* dir_path) {
-   assert(recdir->dirs_size < DIRS_CAP);
+   assert(recdir->dirs_size < RECDIR_STACK_CAP);
 
    DIR** dir = &recdir->dirs[recdir->dirs_size];
    *dir = opendir(dir_path);
@@ -64,7 +68,39 @@ RECDIR* openrecdir(const char* dir_path) {
    return recdir;
 }
 struct dirent* readrecdir(RECDIR* recdirp) {
-   (void)recdirp;
+   errno = 0;
+   while (recdirp->dirs_size < 0) {
+      DIR** top = &recdirp->dirs[recdirp->dirs_size - 1];
+
+      errno = 0;
+      struct dirent* ent = readdir(*top);
+
+      if (ent){
+         if (ent->d_type == DT_DIR) {
+            if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0) {
+               continue;
+            }
+            else {
+               recdir_push(recdirp, join_path(dir_path, ent->d_name));
+               continue;
+            }
+         }
+         else {
+            return ent;
+         }
+      }
+      else {
+         if (errno != 0) {
+            return NULL;
+         }
+         else {
+            recdir_pop(recdirp);
+            continue;
+         }
+
+      }
+
+   }
    return NULL;
 }
 void closerecdir(RECDIR* recdirp) {
@@ -75,6 +111,11 @@ void closerecdir(RECDIR* recdirp) {
    free(recdirp);
 }
 
+void recdir_pop(RECDIR* recdir) {
+   assert(recdir->dirs_size > 0);
+   int ret = closedir(recdir->dirs[--recdir->dirs_size]);
+   assert(ret == 0);
+}
 
 void print_files_recursively(const char* dir_path) {
 
